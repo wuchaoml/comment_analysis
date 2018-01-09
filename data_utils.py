@@ -5,7 +5,7 @@ import config
 
 
 class Data(object):
-    def __init__(self, max_length=200, batch_size=128, no_of_classes=4):
+    def __init__(self, max_length=200, batch_size=128, no_of_classes=1):
         self.max_length = max_length
         self.no_of_classes = no_of_classes
         self.reverse_dictionary = reverse_dictionary
@@ -37,10 +37,7 @@ class Data(object):
 
     # 数据混乱化
     def shuffle_data(self):
-        data_size = len(self.data)
-        shuffle_indices = np.random.permutation(data_size)
-        print(self.data[19999])
-        self.shuffled_data = self.data[shuffle_indices]
+        np.random.shuffle(self.data)
 
     # 获得批处理的数据(返回的是已经index化的数据）
     def get_batch_data(self, batch_num=0):
@@ -49,7 +46,7 @@ class Data(object):
         end_index = data_size if self.batch_size == 0 else min(
             (batch_num + 1) * self.batch_size, data_size)
 
-        batch_texts = self.shuffle_data[start_index:end_index]
+        batch_texts = self.data[start_index:end_index]
         batch_indices = []
         classes = []
         for c, s in batch_texts:
@@ -57,7 +54,7 @@ class Data(object):
             if self.no_of_classes > 2:
                 c = int(c) - 1
                 one_hot = np.eye(self.no_of_classes, dtype='int64')
-                classes.append(ont_hot[c])
+                classes.append(one_hot[c])
             else:
                 classes.append(c)
         return np.asarray(batch_indices, dtype='int64'), classes
@@ -72,3 +69,5 @@ if __name__ == '__main__':
                       batch_size=config.batch_size, no_of_classes=config.no_of_classes)
     train_data.build_model_dataset()
     train_data.shuffle_data()
+    batch_indices, classes = train_data.get_batch_data(batch_num=5)
+    print(batch_indices, classes)
