@@ -1,6 +1,7 @@
 import numpy as np
 from common import dictionary, reverse_dictionary
 import xlrd
+import config
 
 
 class Data(object):
@@ -11,6 +12,7 @@ class Data(object):
         self.model_dataset_index = []
         self.batch_size = batch_size
         self.data = []
+
     # 模型需要数据的处理（训练和验证）
 
     def build_model_dataset(self):
@@ -28,14 +30,16 @@ class Data(object):
                     else:
                         index = 0
                     line_dataset[i] = index
-                self.data.append([int(label), line_dataset])
+                self.data.append((int(label), line_dataset))
+
         data_to_index(neg_data, 0)
         data_to_index(pos_data, 1)
 
     # 数据混乱化
     def shuffle_data(self):
         data_size = len(self.data)
-        shuffle_indices = np.random.permutation(np.arange(data_size))
+        shuffle_indices = np.random.permutation(data_size)
+        print(self.data[19999])
         self.shuffled_data = self.data[shuffle_indices]
 
     # 获得批处理的数据(返回的是已经index化的数据）
@@ -60,3 +64,11 @@ class Data(object):
 
     def get_length(self):
         return len(self.data)
+
+
+if __name__ == '__main__':
+    exec(open('config.py').read())
+    train_data = Data(max_length=config.max_length,
+                      batch_size=config.batch_size, no_of_classes=config.no_of_classes)
+    train_data.build_model_dataset()
+    train_data.shuffle_data()
