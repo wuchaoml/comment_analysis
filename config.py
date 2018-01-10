@@ -4,7 +4,7 @@ class TrainingConfig(object):
     momentum = 0.9
     decay_step = 15000
     decay_rate = 0.95
-    epoches = 50
+    epoches = 1000
     evaluate_every = 100
     checkpoint_every = 100
 
@@ -22,10 +22,10 @@ class ModelConfig(object):
 
 
 class Config(object):
-    max_length = 200
+    max_length = 500
     batch_size = 64
-    no_of_classes = 1
-    learning_rate = 0.5
+    no_of_classes = 2
+    learning_rate = 0.2
 
     training = TrainingConfig()
     model = ModelConfig()

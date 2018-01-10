@@ -56,7 +56,8 @@ class Data(object):
                 one_hot = np.eye(self.no_of_classes, dtype='int64')
                 classes.append(one_hot[c])
             else:
-                classes.append(c)
+                one_hot = np.eye(self.no_of_classes, dtype='int64')
+                classes.append(one_hot[c])
         return np.asarray(batch_indices, dtype='int64'), classes
 
     def get_length(self):
