@@ -79,6 +79,8 @@ class CharConvNet(object):
             b = tf.Variable(tf.random_uniform(
                 shape=[no_of_classes], minval=-stdv, maxval=stdv), name='b')
             self.p_y_given_x = tf.nn.xw_plus_b(x, W, b, name='scores')
+            # self.p_y_given_x = tf.clip_by_value(
+            #     self.p_y_given_x, 1e-8, tf.reduce_max(self.p_y_given_x))
             self.predictions = tf.argmax(self.p_y_given_x, 1)
 
         # 损失函数
