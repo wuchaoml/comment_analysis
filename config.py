@@ -23,9 +23,9 @@ class ModelConfig(object):
 
 class Config(object):
     max_length = 500
-    batch_size = 32
+    batch_size = 128
     no_of_classes = 2
-    learning_rate = 0.05
+    learning_rate = 0.001
 
     training = TrainingConfig()
     model = ModelConfig()
