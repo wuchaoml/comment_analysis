@@ -14,10 +14,10 @@ if __name__ == '__main__':
     print('Loading data...')
     train_data = Data(max_length=config.max_length,
                       batch_size=config.batch_size, no_of_classes=config.no_of_classes)
-    train_data.build_model_dataset()
+    train_data.build_model_dataset('train')
     dev_data = Data(max_length=config.max_length,
                     batch_size=config.batch_size, no_of_classes=config.no_of_classes)
-    dev_data.build_model_dataset()
+    dev_data.build_model_dataset('dev')
 
     '''epoch计算'''
     num_batches_per_epoch = int(
@@ -119,6 +119,7 @@ if __name__ == '__main__':
                     current_step = tf.train.global_step(sess, global_step)
 
                     if current_step % config.training.evaluate_every == 0:
+                        dev_data.shuffle_data()
                         xin, yin = dev_data.get_batch_data()
                         print('\nEvaluation:')
                         dev_step(xin, yin, writer=dev_summary_writer)

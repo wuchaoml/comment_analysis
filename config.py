@@ -10,12 +10,12 @@ class TrainingConfig(object):
 
 
 class ModelConfig(object):
-    conv_layers = [[512, 7, 3],
-                   [512, 7, 3],
-                   [512, 3, None],
-                   [512, 3, None],
-                   [512, 3, None],
-                   [512, 3, 3]]
+    conv_layers = [[512, 5, 3],
+                   [512, 5, 3],
+                   [512, 2, None],
+                   [512, 2, None],
+                   [512, 2, None],
+                   [512, 2, 3]]
 
     fully_connected_layers = [1024, 1024]
     th = 1e-6
@@ -25,7 +25,7 @@ class Config(object):
     max_length = 500
     batch_size = 128
     no_of_classes = 2
-    learning_rate = 0.0005
+    learning_rate = 0.0001
 
     training = TrainingConfig()
     model = ModelConfig()
