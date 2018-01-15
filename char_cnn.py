@@ -4,7 +4,10 @@ from math import sqrt
 
 
 class CharConvNet(object):
-    def __init__(self, conv_layers=[[256, 7, 3], [256, 7, 3], [256, 3, None], [256, 3, None], [256, 3, None], [256, 3, 3]], fully_layers=[1024, 1024], max_length=25, no_of_classes=4, th=1e-6):
+    def __init__(self,
+                 conv_layers=[[256, 7, 3], [256, 7, 3], [256, 3, None], [
+                     256, 3, None], [256, 3, None], [256, 3, 3]],
+                 fully_layers=[1024, 1024], max_length=25, no_of_classes=4, th=1e-6):
         super(CharConvNet, self).__init__()
         self.character_embeddings = pickle.load(
             open('character_embeddings.pkl', 'rb'))
@@ -22,7 +25,6 @@ class CharConvNet(object):
         with tf.name_scope('Embedding-Layer'):
             x = tf.nn.embedding_lookup(self.character_embeddings, self.input_x)
             x = tf.expand_dims(x, -1)
-
         var_id = 0
 
         # 神经网络计算图
@@ -39,6 +41,7 @@ class CharConvNet(object):
                 b = tf.Variable(tf.random_uniform(
                     shape=[cl[0]], minval=-stdv, maxval=stdv), name='b')
                 conv = tf.nn.conv2d(x, W, [1, 1, 1, 1], 'VALID', name='Conv')
+                # x = tf.nn.relu(conv+b)
                 x = tf.nn.bias_add(conv, b)
 
             # 最大值池化处理
