@@ -61,8 +61,7 @@ if __name__ == '__main__':
 
             timestamp = str(int(time.time()))
             out_dir = os.path.abspath(os.path.join(
-                'E:/', 'runs', timestamp))
-            print(out_dir)
+                os.path.curdir, 'runs', timestamp))
             print('Writing to {}\n'.format(out_dir))
 
             loss_summary = tf.summary.scalar('loss', char_cnn.loss)

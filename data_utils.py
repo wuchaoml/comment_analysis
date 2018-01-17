@@ -32,6 +32,17 @@ class Data(object):
                     index = 0
                 line_dataset[j] = index
             self.data.append([star, line_dataset])
+            '''
+            if data_set_name == 'train':
+                for j in range(length):
+                    if line_character_list[j] in dictionary:
+                        index = dictionary[line_character_list[j]]
+                    else:
+                        index = 0
+                    line_dataset[length-j-1] = index
+                self.data.append([star,line_dataset])
+
+            '''
 
     # 数据混乱化
     def shuffle_data(self):

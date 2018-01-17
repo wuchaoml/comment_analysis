@@ -7,7 +7,7 @@ class CharConvNet(object):
     def __init__(self,
                  conv_layers=[[256, 7, 3], [256, 7, 3], [256, 3, None], [
                      256, 3, None], [256, 3, None], [256, 3, 3]],
-                 fully_layers=[1024, 1024], max_length=25, no_of_classes=4, th=1e-6):
+                 fully_layers=[1024, 1024], max_length=25, no_of_classes=4, th=1e-6, beta=0.01):
         super(CharConvNet, self).__init__()
         self.character_embeddings = pickle.load(
             open('character_embeddings.pkl', 'rb'))
@@ -43,6 +43,7 @@ class CharConvNet(object):
                 conv = tf.nn.conv2d(x, W, [1, 1, 1, 1], 'VALID', name='Conv')
                 # x = tf.nn.relu(conv+b)
                 x = tf.nn.bias_add(conv, b)
+                tf.add_to_collection(tf.GraphKeys.WEIGHTS, W)
 
             # 最大值池化处理
             if not cl[-1] is None:
@@ -71,6 +72,8 @@ class CharConvNet(object):
                     shape=[fl], minval=-stdv, maxval=stdv, dtype='float32', name='b'))
                 x = tf.nn.xw_plus_b(x, W, b)
 
+                tf.add_to_collection(tf.GraphKeys.WEIGHTS, W)
+
             with tf.name_scope('DropoutLayer'):
                 x = tf.nn.dropout(x, self.dropout_keep_prob)
 
@@ -86,11 +89,20 @@ class CharConvNet(object):
             #     self.p_y_given_x, 1e-8, tf.reduce_max(self.p_y_given_x))
             self.predictions = tf.argmax(self.p_y_given_x, 1)
 
+            tf.add_to_collection(tf.GraphKeys.WEIGHTS, W)
+
         # 损失函数
         with tf.name_scope('loss'):
             losses = tf.nn.softmax_cross_entropy_with_logits(
                 labels=self.input_y, logits=self.p_y_given_x)
             self.loss = tf.reduce_mean(losses)
+
+            regularizer = tf.contrib.layers.l2_regularizer(scale=beta)
+            reg_term = tf.contrib.layers.apply_regularization(regularizer)
+            self.loss = tf.reduce_mean(self.loss + reg_term)
+
+            # regularizer = tf.nn.l2_loss(W)
+            # self.loss = tf.reduce_mean(self.loss + beta * regularizer)
 
         # 准确率
         with tf.name_scope('Accuracy'):
