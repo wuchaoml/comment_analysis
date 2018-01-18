@@ -8,6 +8,7 @@ from char_cnn import CharConvNet
 
 if __name__ == '__main__':
     print('start...')
+    tf.set_random_seed(0.18)
     exec(open('config.py').read())  # 加载配置文件
     print(config.model.th)
     print('end...')
@@ -89,7 +90,9 @@ if __name__ == '__main__':
 
             def train_step(x_batch, y_batch):
                 feed_dict = {char_cnn.input_x: x_batch, char_cnn.input_y: y_batch,
-                             char_cnn.dropout_keep_prob: config.training.p}
+                             char_cnn.dropout_keep_prob: config.training.p,
+                             char_cnn.train_test_flag: False,
+                             char_cnn.step: global_step}
 
                 _, step, summaries, loss, accuracy = sess.run(
                     [train_op, global_step, train_summary_op, char_cnn.loss, char_cnn.accuracy], feed_dict)
@@ -101,7 +104,9 @@ if __name__ == '__main__':
 
             def dev_step(x_batch, y_batch, writer=None):
                 feed_dict = {char_cnn.input_x: x_batch,
-                             char_cnn.input_y: y_batch, char_cnn.dropout_keep_prob: 1.0}
+                             char_cnn.input_y: y_batch, char_cnn.dropout_keep_prob: 1.0,
+                             char_cnn.train_test_flag: True,
+                             char_cnn.step: global_step}
                 step, summaries, loss, accuracy = sess.run(
                     [global_step, dev_summary_op, char_cnn.loss, char_cnn.accuracy], feed_dict)
                 time_str = datetime.datetime.now().isoformat()

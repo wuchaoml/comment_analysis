@@ -9,7 +9,7 @@ import numpy as np
 character_size = 3500
 data_index = 0
 
-with open('..\comment.txt', 'rb') as fr:
+with open('../comment.txt', 'rb') as fr:
     comment_text = fr.readlines()
     character_list = []
     for line in comment_text:
@@ -67,7 +67,7 @@ def load_data_set():
             continue
         pos_data_set.append([1, text])
 
-    with open('comment_score.txt', 'rb') as fr:
+    with open('../comment_score.txt', 'rb') as fr:
         comment_text = fr.readlines()
         for line in comment_text:
             line = line.decode('utf-8')[0:-1]

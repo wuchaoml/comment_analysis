@@ -12,6 +12,24 @@ class CharConvNet(object):
         self.character_embeddings = pickle.load(
             open('character_embeddings.pkl', 'rb'))
 
+	# 批标准化
+        def batch_norm(Ylogits, is_test, iteration, offset, convolutional=False):
+            exp_moving_avg = tf.train.ExponentialMovingAverage(
+                0.999, iteration)
+            bnepsilon = 1e-5
+            if convolutional:
+                mean, variance = tf.nn.moments(Ylogits, [0, 1, 2])
+            else:
+                mean, variance = tf.nn.moments(Ylogits, [0])
+            update_moving_averages = exp_moving_avg.apply([mean, variance])
+            m = tf.cond(is_test, lambda: exp_moving_avg.average(
+                mean), lambda: mean)
+            v = tf.cond(is_test, lambda: exp_moving_avg.average(
+                variance), lambda: variance)
+            Ybn = tf.nn.batch_normalization(
+                Ylogits, m, v, offset, None, bnepsilon)
+            return Ybn, update_moving_averages
+
         # 输入层配置
         with tf.name_scope('Input-Layer'):
             self.input_x = tf.placeholder(
@@ -20,14 +38,18 @@ class CharConvNet(object):
                 tf.float32, shape=[None, no_of_classes], name='input_y')
             self.dropout_keep_prob = tf.placeholder(
                 tf.float32, name='dropout_keep_prob')
+            self.test_flag = tf.placeholder(
+                tf.bool)
+            self.step = tf.placeholder(tf.int32)
 
         # 将index转为字符向量
         with tf.name_scope('Embedding-Layer'):
             x = tf.nn.embedding_lookup(self.character_embeddings, self.input_x)
             x = tf.expand_dims(x, -1)
-        var_id = 0
 
         # 神经网络计算图
+        var_id = 0
+        update_ema = [None for i in range(10)]
         for i, cl in enumerate(conv_layers):
             var_id += 1
 
@@ -42,7 +64,11 @@ class CharConvNet(object):
                     shape=[cl[0]], minval=-stdv, maxval=stdv), name='b')
                 conv = tf.nn.conv2d(x, W, [1, 1, 1, 1], 'VALID', name='Conv')
                 # x = tf.nn.relu(conv+b)
-                x = tf.nn.bias_add(conv, b)
+                # x = tf.nn.bias_add(conv, b)
+                x, update_ema[var_id] = batch_norm(
+                    conv, self.test_flag, self.step, b, convolutional=True)
+                x = tf.nn.relu(x)
+
                 tf.add_to_collection(tf.GraphKeys.WEIGHTS, W)
 
             # 最大值池化处理
@@ -70,7 +96,13 @@ class CharConvNet(object):
                     [weights[i], fl], minval=-stdv, maxval=stdv), dtype='float32', name='W')
                 b = tf.Variable(tf.random_uniform(
                     shape=[fl], minval=-stdv, maxval=stdv, dtype='float32', name='b'))
-                x = tf.nn.xw_plus_b(x, W, b)
+
+                y = tf.matmul(x, W)
+                x, update_ema[i] = batch_norm(
+                    y, self.test_flag, self.step, b)
+                x = tf.nn.relu(x)
+
+                # x = tf.nn.xw_plus_b(x, W, b)
 
                 tf.add_to_collection(tf.GraphKeys.WEIGHTS, W)
 
@@ -97,9 +129,9 @@ class CharConvNet(object):
                 labels=self.input_y, logits=self.p_y_given_x)
             self.loss = tf.reduce_mean(losses)
 
-            regularizer = tf.contrib.layers.l2_regularizer(scale=beta)
-            reg_term = tf.contrib.layers.apply_regularization(regularizer)
-            self.loss = tf.reduce_mean(self.loss + reg_term)
+            # regularizer = tf.contrib.layers.l2_regularizer(scale=beta)
+            # reg_term = tf.contrib.layers.apply_regularization(regularizer)
+            # self.loss = tf.reduce_mean(self.loss + reg_term)
 
             # regularizer = tf.nn.l2_loss(W)
             # self.loss = tf.reduce_mean(self.loss + beta * regularizer)
