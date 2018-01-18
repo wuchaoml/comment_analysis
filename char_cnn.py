@@ -12,7 +12,7 @@ class CharConvNet(object):
         self.character_embeddings = pickle.load(
             open('character_embeddings.pkl', 'rb'))
 
-	# 批标准化
+        # 批标准化
         def batch_norm(Ylogits, is_test, iteration, offset, convolutional=False):
             exp_moving_avg = tf.train.ExponentialMovingAverage(
                 0.999, iteration)

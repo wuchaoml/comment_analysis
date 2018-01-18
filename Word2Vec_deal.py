@@ -110,5 +110,3 @@ with tf.Session(graph=graph) as session:
     print(final_embeddings)
     word2vec_saver.save(
         session, '/home/wuchao/paper/sentiment_analysis/word2vec/word2vec_model')
-
-# 所有的配置参数
